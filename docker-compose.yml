@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:alpine
+    restart: unless-stopped
+    volumes:
+      - db:/var/lib/postgresql/data
+    env_file:
+      - db.env
+
+  app:
+    image: nextcloud:fpm-alpine
+    restart: unless-stopped
+    volumes:
+      - nextcloud:/var/www/html
+    environment:
+      - POSTGRES_HOST=db
+    env_file:
+      - db.env
+    depends_on:
+      - db
+
+  web:
+    build: ./web
+    restart: unless-stopped
+    volumes:
+      - nextcloud:/var/www/html:ro
+    depends_on:
+      - app
+    networks:
+      default:
+      inverseproxy_shared:
+    labels:
+      traefik.docker.network: "reverseproxy_shared"
+      traefik.enable: "true"
+      traefik.port: "80"
+      traefik.cloud.frontend.rule: "Host:yourdomain.com"
+
+volumes:
+  db:
+  nextcloud:
+
+networks:
+    default:
+        driver_opts:
+            encrypted: 1
+
+    reverseproxy_shared:
+        external: true
