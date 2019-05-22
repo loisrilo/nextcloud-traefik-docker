@@ -30,7 +30,7 @@ services:
       - app
     networks:
       default:
-      inverseproxy_shared:
+      reverseproxy_shared:
     labels:
       traefik.docker.network: "reverseproxy_shared"
       traefik.enable: "true"
